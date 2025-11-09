@@ -1,5 +1,10 @@
+import jwt
+import datetime
 from flask import request, jsonify
 from src.models.user import User
+
+SECRET_KEY = 'key'  # Replace with a strong, securely stored secret key
+
 
 def register():
     data = request.get_json()
@@ -29,5 +34,11 @@ def login():
     if not user or not User.check_password(user[2], password):
         return jsonify({'error': 'Invalid login or password'}), 401
 
-    # In a real application, you would return a JWT token here
-    return jsonify({'message': 'Login successful'})
+    # Generate JWT token
+    token = jwt.encode({
+        'user_id': user[0],
+        'role': user[3],
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+    }, SECRET_KEY, algorithm='HS256')
+
+    return jsonify({'token': token})

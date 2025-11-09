@@ -24,3 +24,11 @@ def create_teacher():
 def get_teachers():
     teachers = Teacher.get_all()
     return jsonify(teachers)
+
+def get_teacher_disciplines(teacher_id):
+    disciplines = Teacher.get_disciplines(teacher_id)
+    return jsonify(disciplines)
+
+def get_students_for_discipline(teacher_id, discipline_id):
+    students = Teacher.get_students_by_discipline(teacher_id, discipline_id)
+    return jsonify(students)

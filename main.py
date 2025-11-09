@@ -18,6 +18,8 @@ app.add_url_rule('/students/<int:student_id>/archive', 'archive_student', studen
 # Register teacher blueprints
 app.add_url_rule('/teachers', 'create_teacher', teachers.create_teacher, methods=['POST'])
 app.add_url_rule('/teachers', 'get_teachers', teachers.get_teachers, methods=['GET'])
+app.add_url_rule('/teachers/<int:teacher_id>/disciplines', 'get_teacher_disciplines', teachers.get_teacher_disciplines, methods=['GET'])
+app.add_url_rule('/teachers/<int:teacher_id>/disciplines/<int:discipline_id>/students', 'get_students_for_discipline', teachers.get_students_for_discipline, methods=['GET'])
 
 # Register discipline blueprints
 app.add_url_rule('/disciplines', 'create_discipline', disciplines.create_discipline, methods=['POST'])
