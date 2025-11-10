@@ -21,6 +21,7 @@ function mainView() {
         <h2>Добро пожаловать в АкадемКонтроль!</h2>
         <p>Выберите свою роль для входа в систему:</p>
         <ul>
+            <li><a href="#login/admin">Администратор</a></li>
             <li><a href="#login/dekanat">Сотрудник деканата</a></li>
             <li><a href="#login/teacher">Преподаватель</a></li>
             <li><a href="#login/student">Студент</a></li>
@@ -29,8 +30,16 @@ function mainView() {
 }
 
 function loginView(role) {
+    // Map URL role to display-friendly role
+    const roleDisplayMap = {
+        'admin': 'Администратор',
+        'dekanat': 'Сотрудник деканата',
+        'teacher': 'Преподаватель',
+        'student': 'Студент'
+    };
+    const displayRole = roleDisplayMap[role] || role;
     return `
-        <h2>Вход для: ${role}</h2>
+        <h2>Вход для: ${displayRole}</h2>
         <form id="login-form">
             <input type="text" id="username" placeholder="Логин" required>
             <input type="password" id="password" placeholder="Пароль" required>
@@ -40,10 +49,19 @@ function loginView(role) {
 }
 
 async function login(role, username, password) {
+    // Map URL role to backend role
+    const roleMap = {
+        'admin': 'Администратор',
+        'dekanat': 'Сотрудник деканата',
+        'teacher': 'Преподаватель',
+        'student': 'Студент'
+    };
+    const backendRole = roleMap[role];
+
     const response = await fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login: username, password, role })
+        body: JSON.stringify({ login: username, password, role: backendRole })
     });
 
     if (response.ok) {
@@ -209,6 +227,15 @@ async function dekanatDashboard() {
     `;
 }
 
+async function adminDashboard() {
+    // TODO: Implement the admin dashboard to have user management capabilities
+    return `
+        <h2>Панель администратора</h2>
+        <p>Управление пользователями</p>
+    `;
+}
+
+
 async function dashboardView() {
     if (!token) {
         window.location.hash = '#';
@@ -219,12 +246,14 @@ async function dashboardView() {
     const role = decodedToken.role;
 
     let dashboardContent = '';
-    if (role === 'student') {
+    if (role === 'Студент') {
         dashboardContent = await studentDashboard();
-    } else if (role === 'teacher') {
+    } else if (role === 'Преподаватель') {
         dashboardContent = await teacherDashboard();
-    } else if (role === 'dekanat') {
+    } else if (role === 'Сотрудник деканата') {
         dashboardContent = await dekanatDashboard();
+    } else if (role === 'Администратор') {
+        dashboardContent = await adminDashboard();
     }
 
     const view = `
@@ -236,9 +265,9 @@ async function dashboardView() {
     document.getElementById('logout-btn').addEventListener('click', logout);
 
     // Initialize dashboard-specific logic
-    if (role === 'teacher') {
+    if (role === 'Преподаватель') {
         initializeTeacherDashboard();
-    } else if (role === 'dekanat') {
+    } else if (role === 'Сотрудник деканата') {
         initializeDekanatDashboard();
     }
 }

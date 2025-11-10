@@ -3,9 +3,17 @@ Main application file
 '''
 from flask import Flask
 from src.api import auth, students, teachers, disciplines, grades, specialties
+from src.models.user import User
 
 # Configure the Flask app to serve static files from the 'src' directory
 app = Flask(__name__, static_folder='src', static_url_path='')
+
+def create_initial_user():
+    # Check if the admin user already exists
+    if not User.find_by_login('admin'):
+        print("Creating 'Сотрудник деканата' user...")
+        User.create('admin', 'admin', 'Сотрудник деканата')
+        print("User 'admin' created successfully.")
 
 @app.route('/')
 def serve_index():
@@ -38,4 +46,5 @@ app.add_url_rule('/specialties', 'create_specialty', specialties.create_specialt
 app.add_url_rule('/specialties', 'get_specialties', specialties.get_specialties, methods=['GET'])
 
 if __name__ == '__main__':
+    create_initial_user()
     app.run(host='0.0.0.0', port=5000, debug=True)
