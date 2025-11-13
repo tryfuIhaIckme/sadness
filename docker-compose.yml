@@ -20,8 +20,12 @@ services:
       - "5432:5432"
     volumes:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d academ_control"]
       interval: 10s
       timeout: 5s
       retries: 5
+      
+volumes:
+  postgres_data:
