@@ -84,9 +84,8 @@ INSERT INTO users (login, password_hash, role) VALUES (
     'Администратор'
 );
 
-
 INSERT INTO users (login, password_hash, role) VALUES (
-    'admin',
+    'dekanat',
     'c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646',
     'Сотрудник деканата'
 );
