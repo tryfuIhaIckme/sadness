@@ -77,3 +77,9 @@ CREATE TABLE grades (
 
 -- Добавление новой специальности
 INSERT INTO specialties (name) VALUES ('Информационные системы и технологии');
+
+INSERT INTO users (login, password_hash, role) VALUES (
+    'admin',
+    'c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646',
+    'Администратор'
+);
