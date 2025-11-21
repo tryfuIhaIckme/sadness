@@ -1,0 +1,32 @@
+name: Docker Build and Push
+
+# Этот workflow будет запускаться при каждом push в любую ветку
+on:
+  push:
+    branches: [ "**" ]
+
+jobs:
+  build-and-push:
+    # Эта строка говорит GitHub использовать ваш раннер на ВМ!
+    runs-on: self-hosted
+
+    steps:
+      # Шаг 1: Скачиваем код из репозитория на раннер
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Шаг 2: Логинимся в Docker Hub, используя секреты
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Шаг 3: Собираем и пушим Docker-образ
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          # Тегируем образ: latest и по хэшу коммита для уникальности
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/sadness:latest, ${{ secrets.DOCKERHUB_USERNAME }}/sadness:${{ github.sha }}
