@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  web:
+    # ---> ГЛАВНОЕ ИЗМЕНЕНИЕ: мы не собираем, а указываем готовый образ <---
+    image: ${DOCKERHUB_USERNAME}/sadness:latest
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: academ_control
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

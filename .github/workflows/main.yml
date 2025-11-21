@@ -1,32 +1,45 @@
-name: Docker Build and Push
+name: CI/CD Pipeline
 
-# Этот workflow будет запускаться при каждом push в любую ветку
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "main", "dev" ] # Запускаем только для этих веток
+  pull_request:
+    branches: [ "dev" ] # Запускаем только для PR в dev
 
 jobs:
-  build-and-push:
-    # Эта строка говорит GitHub использовать ваш раннер на ВМ!
+  build-and-test:
     runs-on: self-hosted
-
     steps:
-      # Шаг 1: Скачиваем код из репозитория на раннер
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # Шаг 2: Логинимся в Docker Hub, используя секреты
+      - uses: actions/checkout@v3
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Шаг 3: Собираем и пушим Docker-образ
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          # Тегируем образ: latest и по хэшу коммита для уникальности
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/sadness:latest, ${{ secrets.DOCKERHUB_USERNAME }}/sadness:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/sadness:${{ github.sha }},${{ secrets.DOCKERHUB_USERNAME }}/sadness:latest
+
+  deploy-to-stage:
+    # Этот шаг выполняется только после успешной сборки
+    needs: build-and-test
+    # И только если изменения были в ветке 'dev'
+    if: github.ref == 'refs/heads/dev'
+    runs-on: self-hosted
+    steps:
+      - name: Deploy to stage server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            # Заходим на stage-сервер и выполняем команды
+            cd ~/sadness || git clone https://github.com/tryfuIhaIckme/sadness.git ~/sadness && cd ~/sadness
+            git pull
+            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            docker-compose -f docker-compose.prod.yml pull
+            docker-compose -f docker-compose.prod.yml up -d
